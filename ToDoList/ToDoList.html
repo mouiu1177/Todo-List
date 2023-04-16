@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoList</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        i {
+            /*icon 不設定的話會出bug*/
+            pointer-events: none;
+        }
+
+        /* linear-gradient 漸層色*/
+        body {
+            background: linear-gradient(45deg, rgb(84, 130, 255), rgb(100, 255, 134));
+        }
+
+        /* header */
+        header {
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            color: white;
+            font-size: 50px;
+        }
+
+        /* form */
+
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        input {
+            border: none;
+            padding: 4px 8px;
+            font-size: 28px;
+            margin: 1.6px;
+        }
+
+        button {
+            border: none;
+            padding: 4px 8px;
+            font-size: 24px;
+            margin: 1.6px;
+        }
+
+        input[type='number'] {
+            width: 50px;
+            text-align: center;
+        }
+
+        /* Chrome, Safari, Edge, Opera 消除input上下箭頭，-> W3C裡面查詢Code */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .btnAdd {
+            cursor: pointer;
+            background-color: rgb(0, 146, 114);
+            color: white;
+        }
+
+        .btnAdd:hover {
+            background-color: rgb(202, 240, 232);
+            color: darkgreen;
+            transition: all 0.1s;
+        }
+
+
+        /* 新增項目section */
+        section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        div.todo {
+            width: 529px;
+            display: flex;
+            align-items: center;
+            margin: 2px 0px;
+            transition: all 0.1s ease;
+        }
+
+        p {
+            background-color: white;
+            color: black;
+            padding: 4px 8px;
+            font-size: 26px;
+        }
+
+        p.todo-text {
+            width: 70%;
+            height: 40px;
+            text-align: center;
+        }
+
+        p.todo-time {
+            width: 50%;
+            height: 40px;
+            text-align: center;
+        }
+
+        #newItem button {
+            padding: 4px 8px;
+            font-size: 26px;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+
+        button.complete {
+            background-color: green;
+        }
+
+        button.trash {
+            background-color: red;
+        }
+
+        .done {
+            opacity: 0.5;
+            text-decoration: line-through;
+            text-decoration-thickness: 1.5px;
+        }
+
+        /*新增後 逐漸放大的CSS設定*/
+        @keyframes scaleUp {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        /*刪除後 逐漸縮小至消失 CSS設定*/
+        @keyframes scaleDown {
+            to {
+                transform: scale(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>ToDo-List</h1>
+    </header>
+    <!-- 填寫資料表單 -->
+    <form action="">
+        <input type="text" placeholder="請輸入待辦事項">
+        <input type="number" max="12" min="1" placeholder="月">
+        <input type="number" max="31" min="1" placeholder="日">
+        <button class="btnAdd">新增</button>
+    </form>
+    <br>
+    <br>
+    <!-- 新增的內容會放到這個section中 -->
+    <section id="newItem"></section>
+
+
+</body>
+
+
+
+
+<script>
+    let section = document.querySelector("#newItem");
+    let add = document.querySelector(".btnAdd");
+
+    //add按鈕 加入事件
+    add.addEventListener("click", e => {
+
+        //停止表單submit出去 -> preventDefault()
+        e.preventDefault();
+        //parentElement是form
+        let newForm = e.target.parentElement;
+        //取得輸入後的待辦事項value
+        let todoText = newForm.children[0].value;
+        //判斷是否有輸入內容
+        if (todoText === "") {
+            alert("請輸入待辦事項");
+            //加return，才不會繼續往下執行
+            return;
+        }
+        //取得輸入後的月份value
+        let todoMonth = newForm.children[1].value;
+        //判斷是否為正確月份
+        if (todoMonth > 12) {
+            alert("請輸入有效月份");
+            return;
+        }
+        //取得輸入後的日期value
+        let todoDate = newForm.children[2].value;
+        //判斷是否為正確日期
+        if (todoDate > 31) {
+            alert("請輸入有效日期");
+            return;
+        }
+
+        // 新增後的項目 todo:<div="todo">:中，包含->text:新增的<p class="todo-text"> 和 time:新增的<p class="todo-time">
+        //輸入後新增待辦事項框
+        let todo = document.createElement("div");
+        todo.classList.add("todo");
+        let text = document.createElement("p");
+        text.classList.add("todo-text");
+        text.innerText = todoText;
+        //輸入後新增月、日框
+        let time = document.createElement("p");
+        time.classList.add("todo-time");
+        //月、日欄位任一個沒有填寫 => 時間未設定 Q:無法判斷對應月、日是否正確
+        if ((todoMonth == '') || (todoDate == '')) {
+            time.innerText = "時間未設定";
+        } else {
+            time.innerText = "2023" + " / " + todoMonth + " / " + todoDate;
+        }
+        //將新增好的待辦事項、日期加入todo
+        todo.appendChild(text);
+        todo.appendChild(time);
+
+        //新增兩個按鈕 => 完成和刪除
+        //完成按鈕 
+        let completeButton = document.createElement("button");
+        completeButton.classList.add("complete");
+        //從HTML引用一個完成Icon
+        completeButton.innerHTML = '<i class="fa-solid fa-check"></i>';
+        //完成按鈕check事件設定:變成完成狀態
+        completeButton.addEventListener("click", e => {
+            let todoItem = e.target.parentElement;
+            //在todoItem中加入toggle()方法，無->則生成 或 有->則刪除 的一個class: done -> 在CSS中做效果(斜槓並變淡)
+            todoItem.classList.toggle("done");
+        })
+        //刪除按鈕
+        let trashButton = document.createElement("button");
+        trashButton.classList.add("trash");
+        //從HTML引用一個刪除Icon
+        trashButton.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+        //刪除按鈕trashcan事件設定:整行刪除消失
+        trashButton.addEventListener("click", e => {
+            let todoItem = e.target.parentElement;
+            todoItem.addEventListener("animationend", () => {
+                todoItem.remove();
+            })
+            //刪除後，物件消失動畫設定
+            todoItem.style.animation = "scaleDown 0.3s forwards";
+        })
+        //設定完按鈕後，加入todo中
+        todo.appendChild(completeButton);
+        todo.appendChild(trashButton);
+
+        //新增項目出來 -> 逐漸放大的JS動畫設定
+        todo.style.animation = "scaleUp 0.3s forwards"
+
+        //按下新增後，清空輸入事項、月、日
+        newForm.children[0].value = "";
+        newForm.children[1].value = "";
+        newForm.children[2].value = "";
+
+        //將設定好的todo加到空的section中
+        section.append(todo);
+    })
+</script>
+
+</html>
